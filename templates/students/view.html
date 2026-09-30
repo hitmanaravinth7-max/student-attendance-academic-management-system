@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.full_name }} ({{ student.roll_no }}) — Student Profile — EduTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex align-items-center">
+        <span class="avatar-large bg-primary text-white rounded-circle p-3 me-3 d-inline-flex align-items-center justify-content-center fw-black fs-4" style="width: 56px; height: 56px;">
+            {{ student.full_name[:1] }}
+        </span>
+        <div>
+            <h3 class="fw-bold text-dark mb-0">{{ student.full_name }}</h3>
+            <span class="badge bg-primary-subtle text-primary font-monospace fw-bold">{{ student.roll_no }}</span>
+            <span class="text-muted small ms-2">{{ student.department }} • Semester {{ student.semester }}</span>
+        </div>
+    </div>
+    <div class="mt-2 mt-md-0 d-flex gap-2">
+        <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            <i class="fa-solid fa-pen me-1"></i> Edit Profile
+        </a>
+        <a href="{{ url_for('manage_students') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Directory
+        </a>
+    </div>
+</div>
+
+<!-- Profile Info & Attendance Stats Row -->
+<div class="row g-4 mb-4">
+    <!-- Student Identity & Contact Card -->
+    <div class="col-md-5 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-address-card text-primary me-2"></i> Student Details</h5>
+            </div>
+            <div class="card-body pt-0">
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Enrollment / Roll No:</span>
+                        <strong class="font-monospace text-dark">{{ student.roll_no }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Email:</span>
+                        <span class="text-dark">{{ student.email }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Department:</span>
+                        <span class="fw-semibold text-dark">{{ student.department }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Current Semester:</span>
+                        <span class="badge bg-secondary-subtle text-dark">Semester {{ student.semester }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Phone:</span>
+                        <span>{{ student.phone or 'Not provided' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Date of Birth:</span>
+                        <span>{{ student.dob or 'Not recorded' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Address:</span>
+                        <span>{{ student.address or 'Campus Hostel' }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Performance Meter Card -->
+    <div class="col-md-7 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-chart-simple text-primary me-2"></i> Attendance Performance</h5>
+                {% if attendance_stats.percentage >= 75 %}
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-bold">
+                        <i class="fa-solid fa-circle-check me-1"></i> Eligible for Semester Exams
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Attendance Shortage (<75%)
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="card-body pt-0">
+                <div class="row align-items-center g-3 my-2">
+                    <div class="col-sm-5 text-center border-end">
+                        <div class="display-3 fw-black {% if attendance_stats.percentage >= 85 %}text-success{% elif attendance_stats.percentage >= 75 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ attendance_stats.percentage }}%
+                        </div>
+                        <div class="text-muted fw-bold text-uppercase fs-8">Cumulative Attendance</div>
+                        <div class="mt-2">
+                            <span class="badge bg-light text-secondary border">Target: 75% Minimum</span>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-7 ps-sm-4">
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="text-muted">Instructional Sessions Logged:</span>
+                            <strong>{{ attendance_stats.total_days }} Days</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="text-muted">Classes Attended (Present + Late):</span>
+                            <strong class="text-success">{{ attendance_stats.attended_days }} Days</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="text-muted">Classes Absent:</span>
+                            <strong class="text-danger">{{ attendance_stats.absent_days }} Days</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span class="text-muted">Late Arrivals:</span>
+                            <strong class="text-warning">{{ attendance_stats.late_days }} Days</strong>
+                        </div>
+
+                        <div class="progress rounded-pill mt-3" style="height: 12px;">
+                            <div class="progress-bar {% if attendance_stats.percentage >= 85 %}bg-success{% elif attendance_stats.percentage >= 75 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ attendance_stats.percentage }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs: Academic Marks vs Daily Attendance History -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="card-header bg-white py-3 border-0">
+        <ul class="nav nav-tabs card-header-tabs" id="studentDetailTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold text-primary" id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic-pane" type="button" role="tab">
+                    <i class="fa-solid fa-award me-1"></i> Academic Performance & Marks
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-secondary" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-pane" type="button" role="tab">
+                    <i class="fa-solid fa-calendar-days me-1"></i> Daily Attendance Register
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="tab-content" id="studentDetailTabContent">
+            <!-- Academic Marks Pane -->
+            <div class="tab-pane fade show active" id="academic-pane" role="tabpanel">
+                <div class="p-4 bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Overall Grade: <span class="badge bg-primary rounded-pill px-3">{{ academic_summary.grade }}</span></h6>
+                        <small class="text-muted">Total Marks: {{ academic_summary.total_obtained }} / {{ academic_summary.total_max }} ({{ academic_summary.overall_percentage }}%)</small>
+                    </div>
+                    <a href="{{ url_for('manage_marks') }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                        <i class="fa-solid fa-plus me-1"></i> Record Marks
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light fs-8 text-uppercase">
+                            <tr>
+                                <th class="ps-4">Subject</th>
+                                <th>Assessment Type</th>
+                                <th>Marks Obtained</th>
+                                <th>Percentage</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if academic_summary.marks_list %}
+                                {% for m in academic_summary.marks_list %}
+                                    {% set pct = ((m.marks_obtained / m.max_marks) * 100)|round(1) %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">{{ m.subject_name }}</div>
+                                            <small class="text-muted font-monospace">{{ m.subject_code }} ({{ m.credits }} Credits)</small>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border">{{ m.exam_type }}</span></td>
+                                        <td>
+                                            <span class="fw-bold text-dark fs-6">{{ m.marks_obtained }}</span>
+                                            <small class="text-muted">/ {{ m.max_marks }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if pct >= 75 %}bg-success-subtle text-success{% elif pct >= 50 %}bg-warning-subtle text-warning-emphasis{% else %}bg-danger-subtle text-danger{% endif %} rounded-pill px-2 py-1 fw-bold">
+                                                {{ pct }}%
+                                            </span>
+                                        </td>
+                                        <td><span class="text-muted small">{{ m.remarks or 'Completed' }}</span></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No academic marks have been recorded for this student yet.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Attendance History Pane -->
+            <div class="tab-pane fade" id="history-pane" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light fs-8 text-uppercase">
+                            <tr>
+                                <th class="ps-4">Date</th>
+                                <th>Status</th>
+                                <th>Marked By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if attendance_history %}
+                                {% for att in attendance_history %}
+                                    <tr>
+                                        <td class="ps-4 fw-semibold text-dark">{{ att.date }}</td>
+                                        <td>
+                                            {% if att.status == 'Present' %}
+                                                <span class="badge bg-success rounded-pill px-3 py-1"><i class="fa-solid fa-check me-1"></i> Present</span>
+                                            {% elif att.status == 'Late' %}
+                                                <span class="badge bg-warning text-dark rounded-pill px-3 py-1"><i class="fa-solid fa-clock me-1"></i> Late Arrival</span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill px-3 py-1"><i class="fa-solid fa-xmark me-1"></i> Absent</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-muted small">{{ att.marked_by }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">
+                                        No daily attendance sessions logged yet.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

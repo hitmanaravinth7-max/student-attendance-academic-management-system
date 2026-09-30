@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration — EduTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white p-4">
+                <div class="d-flex align-items-center">
+                    <span class="bg-white text-primary rounded-circle p-2 me-3 d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="fa-solid fa-user-plus fs-5"></i>
+                    </span>
+                    <div>
+                        <h4 class="fw-bold mb-0">Student Registration Portal</h4>
+                        <p class="mb-0 text-white-50 small">Create your college student account to view attendance & academic grades</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('register') }}">
+                    <h6 class="text-uppercase text-muted fw-bold fs-8 mb-3"><i class="fa-solid fa-id-badge text-primary me-1"></i> Academic Identification</h6>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="roll_no" class="form-label fw-semibold">University Roll Number *</label>
+                            <input type="text" class="form-control rounded-3" id="roll_no" name="roll_no" placeholder="e.g. CS2024045" required>
+                            <div class="form-text">Your unique college registration number.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="full_name" class="form-label fw-semibold">Full Legal Name *</label>
+                            <input type="text" class="form-control rounded-3" id="full_name" name="full_name" placeholder="e.g. John Doe" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="department" class="form-label fw-semibold">Academic Department *</label>
+                            <select class="form-select rounded-3" id="department" name="department" required>
+                                <option value="" disabled selected>Select Department</option>
+                                <option value="Computer Science">Computer Science & Engineering</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Electronics & Communication">Electronics & Communication</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                <option value="Electrical Engineering">Electrical Engineering</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="semester" class="form-label fw-semibold">Current Semester *</label>
+                            <select class="form-select rounded-3" id="semester" name="semester" required>
+                                <option value="" disabled selected>Select Semester</option>
+                                {% for sem in range(1, 9) %}
+                                    <option value="{{ sem }}">Semester {{ sem }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase text-muted fw-bold fs-8 mb-3"><i class="fa-solid fa-envelope text-primary me-1"></i> Contact & Personal Information</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label fw-semibold">Email Address *</label>
+                            <input type="email" class="form-control rounded-3" id="email" name="email" placeholder="name@college.edu" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label fw-semibold">Mobile Number</label>
+                            <input type="tel" class="form-control rounded-3" id="phone" name="phone" placeholder="10-digit mobile number">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="dob" class="form-label fw-semibold">Date of Birth</label>
+                            <input type="date" class="form-control rounded-3" id="dob" name="dob">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="address" class="form-label fw-semibold">Residential Address</label>
+                            <input type="text" class="form-control rounded-3" id="address" name="address" placeholder="Hostel or city address">
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase text-muted fw-bold fs-8 mb-3"><i class="fa-solid fa-lock text-primary me-1"></i> Security Credentials</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="password" class="form-label fw-semibold">Account Password *</label>
+                            <input type="password" class="form-control rounded-3" id="password" name="password" minlength="6" placeholder="Min 6 characters" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="confirm_password" class="form-label fw-semibold">Confirm Password *</label>
+                            <input type="password" class="form-control rounded-3" id="confirm_password" name="confirm_password" minlength="6" placeholder="Re-type password" required>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{{ url_for('login') }}" class="text-decoration-none text-muted">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Back to Sign In
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                            <i class="fa-solid fa-user-check me-2"></i> Register Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

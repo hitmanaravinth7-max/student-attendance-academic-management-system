@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Attendance Register — EduTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-calendar-check text-primary me-2"></i> Daily Class Attendance Register
+        </h3>
+        <p class="text-muted small mb-0">Record instructional session attendance per department and semester</p>
+    </div>
+    <div class="mt-2 mt-md-0 d-flex gap-2">
+        <a href="{{ url_for('attendance_report') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fa-solid fa-file-waveform me-1"></i> Attendance Reports
+        </a>
+    </div>
+</div>
+
+<!-- Session Selector Form -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('mark_attendance') }}" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="date" class="form-label fw-semibold fs-7 mb-1">Session Date *</label>
+                <input type="date" class="form-control rounded-3" id="date" name="date" value="{{ selected_date }}" required onchange="this.form.submit()">
+            </div>
+
+            <div class="col-md-4">
+                <label for="department" class="form-label fw-semibold fs-7 mb-1">Academic Department *</label>
+                <select class="form-select rounded-3" id="department" name="department" onchange="this.form.submit()">
+                    {% for d in departments %}
+                        <option value="{{ d }}" {% if selected_dept == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="semester" class="form-label fw-semibold fs-7 mb-1">Semester *</label>
+                <select class="form-select rounded-3" id="semester" name="semester" onchange="this.form.submit()">
+                    {% for sem in range(1, 9) %}
+                        <option value="{{ sem }}" {% if selected_sem == sem %}selected{% endif %}>Semester {{ sem }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary rounded-3 w-100 fw-bold">
+                    <i class="fa-solid fa-arrows-rotate me-1"></i> Load Roll
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Attendance Matrix Form -->
+<form method="POST" action="{{ url_for('mark_attendance') }}">
+    <input type="hidden" name="date" value="{{ selected_date }}">
+    <input type="hidden" name="department" value="{{ selected_dept }}">
+    <input type="hidden" name="semester" value="{{ selected_sem }}">
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="fw-bold mb-0 text-dark">
+                    {{ selected_dept }} — Semester {{ selected_sem }}
+                    <span class="badge bg-primary-subtle text-primary ms-2">{{ students|length }} Students</span>
+                </h5>
+                <small class="text-muted">Attendance Date: <strong>{{ selected_date }}</strong></small>
+            </div>
+
+            <!-- Quick Batch Mark Buttons -->
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-semibold" onclick="markAllStatus('Present')">
+                    <i class="fa-solid fa-check-double me-1"></i> Mark All Present
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-semibold" onclick="markAllStatus('Absent')">
+                    <i class="fa-solid fa-xmark me-1"></i> Mark All Absent
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light fs-8 text-uppercase">
+                    <tr>
+                        <th class="ps-4" style="width: 80px;">#</th>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th class="text-center" style="width: 320px;">Attendance Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if students %}
+                        {% for s in students %}
+                            {% set current_status = existing_status.get(s.id, 'Present') %}
+                            <tr>
+                                <td class="ps-4 text-muted small">{{ loop.index }}</td>
+                                <td class="fw-bold font-monospace text-primary">{{ s.roll_no }}</td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ s.full_name }}</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <!-- Present Radio -->
+                                        <input type="radio" class="btn-check status-present" name="status_{{ s.id }}" id="present_{{ s.id }}" value="Present" {% if current_status == 'Present' %}checked{% endif %} autocomplete="off">
+                                        <label class="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold" for="present_{{ s.id }}">
+                                            <i class="fa-solid fa-check me-1"></i> Present
+                                        </label>
+
+                                        <!-- Late Radio -->
+                                        <input type="radio" class="btn-check status-late" name="status_{{ s.id }}" id="late_{{ s.id }}" value="Late" {% if current_status == 'Late' %}checked{% endif %} autocomplete="off">
+                                        <label class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-semibold text-dark" for="late_{{ s.id }}">
+                                            <i class="fa-solid fa-clock me-1"></i> Late
+                                        </label>
+
+                                        <!-- Absent Radio -->
+                                        <input type="radio" class="btn-check status-absent" name="status_{{ s.id }}" id="absent_{{ s.id }}" value="Absent" {% if current_status == 'Absent' %}checked{% endif %} autocomplete="off">
+                                        <label class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold" for="absent_{{ s.id }}">
+                                            <i class="fa-solid fa-xmark me-1"></i> Absent
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-users-slash fs-1 d-block mb-3 text-secondary"></i>
+                                <h5>No students enrolled in {{ selected_dept }} (Semester {{ selected_sem }})</h5>
+                                <p class="small mb-3">Add students to this department and semester first.</p>
+                                <a href="{{ url_for('add_student') }}" class="btn btn-primary btn-sm rounded-pill">Add Student</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if students %}
+            <div class="card-footer bg-white p-3 border-0 d-flex justify-content-between align-items-center">
+                <span class="text-muted small">All changes are immediately committed to database records.</span>
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                    <i class="fa-solid fa-floppy-disk me-2"></i> Save Session Attendance
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function markAllStatus(status) {
+    if (status === 'Present') {
+        document.querySelectorAll('.status-present').forEach(rb => rb.checked = true);
+    } else if (status === 'Absent') {
+        document.querySelectorAll('.status-absent').forEach(rb => rb.checked = true);
+    }
+}
+</script>
+{% endblock %}

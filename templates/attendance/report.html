@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Cumulative Attendance Report — EduTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-file-waveform text-primary me-2"></i> Cumulative Attendance Register & Report
+        </h3>
+        <p class="text-muted small mb-0">Official institutional report with automatic percentage calculation and examination eligibility</p>
+    </div>
+    <div class="mt-2 mt-md-0 d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="window.print()">
+            <i class="fa-solid fa-print me-1"></i> Print / Export Report
+        </button>
+        <a href="{{ url_for('mark_attendance') }}" class="btn btn-primary btn-sm rounded-pill px-3">
+            <i class="fa-solid fa-calendar-check me-1"></i> Mark Attendance
+        </a>
+    </div>
+</div>
+
+<!-- Filters Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4 no-print">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('attendance_report') }}" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="department" class="form-label fw-semibold fs-7 mb-1">Filter Department</label>
+                <select class="form-select rounded-3" id="department" name="department">
+                    <option value="">All Departments</option>
+                    {% for d in departments %}
+                        <option value="{{ d }}" {% if selected_dept == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="semester" class="form-label fw-semibold fs-7 mb-1">Filter Semester</label>
+                <select class="form-select rounded-3" id="semester" name="semester">
+                    <option value="">All Semesters</option>
+                    {% for sem in range(1, 9) %}
+                        <option value="{{ sem }}" {% if selected_sem == sem %}selected{% endif %}>Semester {{ sem }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-3 flex-grow-1 fw-bold">
+                    <i class="fa-solid fa-filter me-1"></i> Filter
+                </button>
+                <a href="{{ url_for('attendance_report') }}" class="btn btn-outline-secondary rounded-3">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Report Summary Badges -->
+{% set total_count = report_list|length %}
+{% set shortage_count = report_list|selectattr('stats.is_low_attendance')|list|length %}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="p-3 bg-white rounded-4 border shadow-sm">
+            <small class="text-muted text-uppercase fw-bold fs-8">Total Students Evaluated</small>
+            <h3 class="fw-black mb-0 text-dark">{{ total_count }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3 bg-white rounded-4 border shadow-sm">
+            <small class="text-muted text-uppercase fw-bold fs-8 text-danger">Exam Ineligible (< 75%)</small>
+            <h3 class="fw-black mb-0 text-danger">{{ shortage_count }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3 bg-white rounded-4 border shadow-sm">
+            <small class="text-muted text-uppercase fw-bold fs-8 text-success">Good Standing (>= 75%)</small>
+            <h3 class="fw-black mb-0 text-success">{{ total_count - shortage_count }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Report Register Table -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 print-card">
+    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-0 text-dark">Official Attendance Summary Ledger</h5>
+            <small class="text-muted">Generated: {{ today_date }} • Minimum Threshold: 75.0%</small>
+        </div>
+        <span class="badge bg-light text-dark border">{{ total_count }} Students Listed</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-light fs-8 text-uppercase">
+                <tr>
+                    <th class="text-center" style="width: 50px;">#</th>
+                    <th>Roll Number</th>
+                    <th>Full Name</th>
+                    <th>Department</th>
+                    <th>Sem</th>
+                    <th class="text-center">Total Days</th>
+                    <th class="text-center">Attended</th>
+                    <th class="text-center">Absent</th>
+                    <th class="text-center">Late</th>
+                    <th class="text-center">Percentage</th>
+                    <th class="text-center">Eligibility</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if report_list %}
+                    {% for item in report_list %}
+                        {% set s = item.student %}
+                        {% set st = item.stats %}
+                        <tr class="{% if st.percentage < 75 and st.total_days > 0 %}table-danger-subtle{% endif %}">
+                            <td class="text-center small">{{ loop.index }}</td>
+                            <td class="fw-bold font-monospace text-primary">{{ s.roll_no }}</td>
+                            <td class="fw-bold text-dark">{{ s.full_name }}</td>
+                            <td>{{ s.department }}</td>
+                            <td class="text-center">Sem {{ s.semester }}</td>
+                            <td class="text-center">{{ st.total_days }}</td>
+                            <td class="text-center fw-semibold text-success">{{ st.attended_days }}</td>
+                            <td class="text-center fw-semibold text-danger">{{ st.absent_days }}</td>
+                            <td class="text-center text-warning-emphasis">{{ st.late_days }}</td>
+                            <td class="text-center">
+                                <span class="fw-black fs-6 {% if st.percentage >= 85 %}text-success{% elif st.percentage >= 75 %}text-warning-emphasis{% else %}text-danger{% endif %}">
+                                    {{ st.percentage }}%
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {% if st.total_days == 0 %}
+                                    <span class="badge bg-secondary-subtle text-secondary rounded-pill">No Data</span>
+                                {% elif st.percentage >= 75 %}
+                                    <span class="badge bg-success rounded-pill px-2 py-1"><i class="fa-solid fa-check me-1"></i> Eligible</span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill px-2 py-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Shortage</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="11" class="text-center py-4 text-muted">
+                            No records found for selected filters.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

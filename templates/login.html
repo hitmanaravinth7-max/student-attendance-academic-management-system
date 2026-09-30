@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — EduTrack Attendance System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 72vh;">
+    <div class="col-md-8 col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white text-center py-4 position-relative">
+                <div class="bg-white text-primary rounded-circle mx-auto p-3 mb-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 58px; height: 58px;">
+                    <i class="fa-solid fa-graduation-cap fs-3"></i>
+                </div>
+                <h4 class="fw-bold mb-1">EduTrack Portal</h4>
+                <p class="mb-0 text-white-50 small">Student Attendance & Academic Management System</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <!-- Role Selector Tabs -->
+                <ul class="nav nav-pills nav-fill mb-4 p-1 bg-light rounded-pill border" id="loginTypeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill fw-bold" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin-login-pane" type="button" role="tab" onclick="setLoginType('admin')">
+                            <i class="fa-solid fa-user-shield me-1"></i> Faculty / Admin
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill fw-bold" id="student-tab" data-bs-toggle="tab" data-bs-target="#student-login-pane" type="button" role="tab" onclick="setLoginType('student')">
+                            <i class="fa-solid fa-user-graduate me-1"></i> Student
+                        </button>
+                    </li>
+                </ul>
+
+                <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+                    <input type="hidden" name="login_type" id="login_type" value="admin">
+
+                    <!-- Username / Roll Number Field -->
+                    <div class="mb-3">
+                        <label for="identifier" class="form-label fw-semibold" id="identifierLabel">
+                            <i class="fa-solid fa-user text-primary me-1"></i> Admin Username or Email
+                        </label>
+                        <input type="text" class="form-control form-control-lg fs-6 rounded-3" id="identifier" name="identifier" placeholder="e.g. admin or admin@college.edu" required autofocus>
+                    </div>
+
+                    <!-- Password Field with Show/Hide -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="password" class="form-label fw-semibold">
+                                <i class="fa-solid fa-lock text-primary me-1"></i> Password
+                            </label>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg fs-6 rounded-start-3" id="password" name="password" placeholder="Enter your password" required>
+                            <button class="btn btn-outline-secondary border-start-0 rounded-end-3" type="button" onclick="togglePasswordVisibility('password', this)">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold shadow-sm">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Sign In to Portal
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Demo Credentials Box -->
+                <div class="bg-light p-3 rounded-3 border mt-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="fs-8 text-uppercase fw-bold text-muted"><i class="fa-solid fa-key text-warning me-1"></i> Quick Demo Logins</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1 fs-8 fw-semibold" onclick="fillCredentials('admin', 'admin', 'admin123')">
+                            <i class="fa-solid fa-user-shield me-1"></i> Admin Demo
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success flex-grow-1 fs-8 fw-semibold" onclick="fillCredentials('student', 'CS2023001', 'student123')">
+                            <i class="fa-solid fa-user-graduate me-1"></i> Student Demo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted small mb-0">New student? <a href="{{ url_for('register') }}" class="text-primary fw-bold text-decoration-none">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setLoginType(type) {
+    document.getElementById('login_type').value = type;
+    const label = document.getElementById('identifierLabel');
+    const input = document.getElementById('identifier');
+
+    if (type === 'admin') {
+        label.innerHTML = '<i class="fa-solid fa-user-shield text-primary me-1"></i> Admin Username or Email';
+        input.placeholder = 'e.g. admin or admin@college.edu';
+    } else {
+        label.innerHTML = '<i class="fa-solid fa-id-card text-success me-1"></i> Student Roll Number or Email';
+        input.placeholder = 'e.g. CS2023001 or aarav.mehta@college.edu';
+    }
+}
+
+function fillCredentials(type, user, pass) {
+    if (type === 'admin') {
+        const tab = new bootstrap.Tab(document.getElementById('admin-tab'));
+        tab.show();
+        setLoginType('admin');
+    } else {
+        const tab = new bootstrap.Tab(document.getElementById('student-tab'));
+        tab.show();
+        setLoginType('student');
+    }
+    document.getElementById('identifier').value = user;
+    document.getElementById('password').value = pass;
+}
+
+function togglePasswordVisibility(fieldId, btn) {
+    const field = document.getElementById(fieldId);
+    const icon = btn.querySelector('i');
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
+{% endblock %}

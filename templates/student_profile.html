@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — EduTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <span class="bg-primary text-white rounded-circle p-2 me-3 d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </span>
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">Student Account Profile</h4>
+                        <p class="mb-0 text-muted small">Update your phone, address, and login password</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+                </a>
+            </div>
+
+            <div class="card-body p-4 p-md-5 pt-3">
+                <form method="POST" action="{{ url_for('student_profile') }}">
+                    <!-- Read-Only Academic Details -->
+                    <h6 class="text-uppercase text-muted fw-bold fs-8 mb-3"><i class="fa-solid fa-graduation-cap text-primary me-1"></i> Institutional Details (Locked by Admin)</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">University Roll Number</label>
+                            <input type="text" class="form-control rounded-3 bg-light text-muted font-monospace" value="{{ student.roll_no }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Legal Name</label>
+                            <input type="text" class="form-control rounded-3 bg-light text-muted" value="{{ student.full_name }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Department</label>
+                            <input type="text" class="form-control rounded-3 bg-light text-muted" value="{{ student.department }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Semester</label>
+                            <input type="text" class="form-control rounded-3 bg-light text-muted" value="Semester {{ student.semester }}" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Editable Contact Details -->
+                    <h6 class="text-uppercase text-muted fw-bold fs-8 mb-3"><i class="fa-solid fa-phone text-primary me-1"></i> Editable Contact Details</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label fw-semibold">Email Address</label>
+                            <input type="email" class="form-control rounded-3 bg-light text-muted" id="email" value="{{ student.email }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label fw-semibold">Mobile Phone Number</label>
+                            <input type="tel" class="form-control rounded-3" id="phone" name="phone" value="{{ student.phone or '' }}" placeholder="10-digit number">
+                        </div>
+                        <div class="col-12">
+                            <label for="address" class="form-label fw-semibold">Residential / Hostel Address</label>
+                            <input type="text" class="form-control rounded-3" id="address" name="address" value="{{ student.address or '' }}" placeholder="Street address, city">
+                        </div>
+                    </div>
+
+                    <!-- Password Change -->
+                    <h6 class="text-uppercase text-muted fw-bold fs-8 mb-3"><i class="fa-solid fa-lock text-primary me-1"></i> Change Password (Optional)</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="current_password" class="form-label fw-semibold">Current Password</label>
+                            <input type="password" class="form-control rounded-3" id="current_password" name="current_password" placeholder="Required only if changing password">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="new_password" class="form-label fw-semibold">New Password (Min 6 chars)</label>
+                            <input type="password" class="form-control rounded-3" id="new_password" name="new_password" placeholder="New password">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <a href="{{ url_for('student_dashboard') }}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
+                            <i class="fa-solid fa-floppy-disk me-2"></i> Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

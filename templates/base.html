@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EduTrack - Student Attendance & Academic Management{% endblock %}</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center fw-bold" href="{{ url_for('index') }}">
+                <span class="bg-white text-primary rounded-circle p-2 me-2 d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </span>
+                <span>EduTrack</span>
+                <span class="badge bg-white text-primary ms-2 fs-8 fw-semibold d-none d-sm-inline">College Academic ERP</span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% if session.get('user_type') == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active fw-bold{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                                <i class="fa-solid fa-chart-pie me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'students' in request.endpoint %}active fw-bold{% endif %}" href="{{ url_for('manage_students') }}">
+                                <i class="fa-solid fa-user-graduate me-1"></i> Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'mark_attendance' %}active fw-bold{% endif %}" href="{{ url_for('mark_attendance') }}">
+                                <i class="fa-solid fa-calendar-check me-1"></i> Daily Attendance
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'attendance_report' %}active fw-bold{% endif %}" href="{{ url_for('attendance_report') }}">
+                                <i class="fa-solid fa-file-waveform me-1"></i> Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'manage_marks' %}active fw-bold{% endif %}" href="{{ url_for('manage_marks') }}">
+                                <i class="fa-solid fa-award me-1"></i> Academic Marks
+                            </a>
+                        </li>
+                    {% elif session.get('user_type') == 'student' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'student_dashboard' %}active fw-bold{% endif %}" href="{{ url_for('student_dashboard') }}">
+                                <i class="fa-solid fa-house-chimney me-1"></i> My Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'student_attendance_history' %}active fw-bold{% endif %}" href="{{ url_for('student_attendance_history') }}">
+                                <i class="fa-solid fa-calendar-days me-1"></i> Attendance Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'student_profile' %}active fw-bold{% endif %}" href="{{ url_for('student_profile') }}">
+                                <i class="fa-solid fa-id-card me-1"></i> My Profile
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <!-- User Session Actions -->
+                <ul class="navbar-nav ms-auto align-items-center">
+                    {% if session.get('user_id') %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="avatar-badge me-2">
+                                    {{ session.get('user_name', 'User')[:1] }}
+                                </span>
+                                <div>
+                                    <div class="fw-semibold lh-1">{{ session.get('user_name') }}</div>
+                                    <small class="text-white-50 fs-8">{{ session.get('user_type')|capitalize }} {% if session.get('roll_no') %}({{ session.get('roll_no') }}){% endif %}</small>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li>
+                                    <h6 class="dropdown-header">Signed in as {{ session.get('user_type')|capitalize }}</h6>
+                                </li>
+                                {% if session.get('user_type') == 'student' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('student_profile') }}"><i class="fa-solid fa-user me-2 text-primary"></i> Edit Profile</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i> Log Out</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item me-2">
+                            <a class="nav-link text-white" href="{{ url_for('login') }}"><i class="fa-solid fa-right-to-bracket me-1"></i> Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-light btn-sm text-primary fw-bold px-3 rounded-pill" href="{{ url_for('register') }}">Student Registration</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages Container -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 d-flex align-items-center" role="alert">
+                        {% if category == 'success' %}
+                            <i class="fa-solid fa-circle-check me-2 fs-5"></i>
+                        {% elif category == 'danger' %}
+                            <i class="fa-solid fa-circle-exclamation me-2 fs-5"></i>
+                        {% elif category == 'warning' %}
+                            <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+                        {% else %}
+                            <i class="fa-solid fa-circle-info me-2 fs-5"></i>
+                        {% endif %}
+                        <div class="flex-grow-1">{{ message }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Block -->
+    <main class="container my-4 flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-top py-3 mt-auto">
+        <div class="container text-center text-muted small">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-md-start mb-2 mb-md-0">
+                    <strong>EduTrack</strong> &copy; {{ current_year }} — Student Attendance & Academic Management System.
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="badge bg-light text-secondary border me-1"><i class="fa-brands fa-python text-primary"></i> Python Flask</span>
+                    <span class="badge bg-light text-secondary border me-1"><i class="fa-solid fa-database text-warning"></i> SQLite</span>
+                    <span class="badge bg-light text-secondary border"><i class="fa-brands fa-bootstrap text-info"></i> Bootstrap 5</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

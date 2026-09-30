@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Marks Management — EduTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-award text-primary me-2"></i> Academic Marks & Evaluation
+        </h3>
+        <p class="text-muted small mb-0">Record internal continuous assessments, assignment scores, and semester examinations</p>
+    </div>
+    <div class="mt-2 mt-md-0 d-flex gap-2">
+        <a href="{{ url_for('manage_students') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fa-solid fa-users me-1"></i> Student Directory
+        </a>
+    </div>
+</div>
+
+<!-- Evaluation Selector Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('manage_marks') }}" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="subject_id" class="form-label fw-semibold fs-7 mb-1">Select Subject *</label>
+                <select class="form-select rounded-3" id="subject_id" name="subject_id" onchange="this.form.submit()">
+                    {% for sub in subjects %}
+                        <option value="{{ sub.id }}" {% if selected_subject_id == sub.id %}selected{% endif %}>
+                            {{ sub.subject_code }} — {{ sub.subject_name }} ({{ sub.department }}, Sem {{ sub.semester }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="exam_type" class="form-label fw-semibold fs-7 mb-1">Assessment Type *</label>
+                <select class="form-select rounded-3" id="exam_type" name="exam_type" onchange="this.form.submit()">
+                    {% for et in ['Internal 1', 'Internal 2', 'Assignment', 'Semester Final'] %}
+                        <option value="{{ et }}" {% if selected_exam == et %}selected{% endif %}>{{ et }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary rounded-3 w-100 fw-bold">
+                    <i class="fa-solid fa-arrows-rotate me-1"></i> Load Students
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Marks Entry Form -->
+{% if selected_subject %}
+    <form method="POST" action="{{ url_for('manage_marks') }}">
+        <input type="hidden" name="subject_id" value="{{ selected_subject.id }}">
+        <input type="hidden" name="exam_type" value="{{ selected_exam }}">
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-header bg-white py-3 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">
+                        {{ selected_subject.subject_name }} ({{ selected_subject.subject_code }})
+                    </h5>
+                    <small class="text-muted">
+                        {{ selected_subject.department }} • Semester {{ selected_subject.semester }} • {{ selected_exam }}
+                    </small>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <label for="max_marks" class="form-label mb-0 fw-semibold fs-7 text-nowrap">Maximum Marks:</label>
+                    <input type="number" class="form-control form-control-sm rounded-3 text-center fw-bold" id="max_marks" name="max_marks" value="50" style="width: 80px;" required>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light fs-8 text-uppercase">
+                        <tr>
+                            <th class="ps-4" style="width: 80px;">#</th>
+                            <th>Roll Number</th>
+                            <th>Student Name</th>
+                            <th style="width: 180px;">Marks Obtained</th>
+                            <th>Remarks / Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if students_with_marks %}
+                            {% for item in students_with_marks %}
+                                {% set s = item.student %}
+                                {% set m = item.mark %}
+                                <tr>
+                                    <td class="ps-4 text-muted small">{{ loop.index }}</td>
+                                    <td class="fw-bold font-monospace text-primary">{{ s.roll_no }}</td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ s.full_name }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.5" min="0" max="100" class="form-control rounded-3 text-center fw-bold" name="marks_{{ s.id }}" value="{{ m.marks_obtained if m else '' }}" placeholder="Score">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm rounded-3" name="remarks_{{ s.id }}" value="{{ m.remarks if m and m.remarks else '' }}" placeholder="e.g. Excellent work, Good effort">
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-user-xmark fs-1 d-block mb-3 text-secondary"></i>
+                                    <h5>No enrolled students in {{ selected_subject.department }} (Semester {{ selected_subject.semester }})</h5>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if students_with_marks %}
+                <div class="card-footer bg-white p-3 border-0 d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Saving marks updates the student's cumulative gradecard immediately.</span>
+                    <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-2"></i> Save Assessment Marks
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </form>
+{% endif %}
+{% endblock %}
