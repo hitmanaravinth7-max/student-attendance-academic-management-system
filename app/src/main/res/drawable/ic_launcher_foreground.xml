@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Glow / Soft shadow behind droplet -->
+    <path
+        android:fillColor="#22000000"
+        android:pathData="M54,26 C54,26 32,52 32,68 C32,80.15 41.85,90 54,90 C66.15,90 76,80.15 76,68 C76,52 54,26 54,26 Z" />
+    <!-- White Droplet Base -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 C54,24 34,50 34,66 C34,77.05 42.95,86 54,86 C65.05,86 74,77.05 74,66 C74,50 54,24 54,24 Z" />
+    <!-- Inner Crimson Droplet Accent -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M54,30 C54,30 38,53 38,66 C38,74.84 45.16,82 54,82 C62.84,82 70,74.84 70,66 C70,53 54,30 54,30 Z" />
+    <!-- White Medical Cross inside droplet -->
+    <!-- Vertical bar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M51,54 L57,54 A1,1 0 0 1 58,55 L58,75 A1,1 0 0 1 57,76 L51,76 A1,1 0 0 1 50,75 L50,55 A1,1 0 0 1 51,54 Z" />
+    <!-- Horizontal bar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,62 L64,62 A1,1 0 0 1 65,63 L65,67 A1,1 0 0 1 64,68 L44,68 A1,1 0 0 1 43,67 L43,63 A1,1 0 0 1 44,62 Z" />
+    <!-- Curved shine highlight on droplet left -->
+    <path
+        android:fillColor="#55FFFFFF"
+        android:pathData="M42,56 C40,61 41,68 45,73 C43.5,69 43,62 45,57 Z" />
+</vector>
